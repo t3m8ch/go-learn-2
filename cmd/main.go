@@ -1,27 +1,35 @@
 package main
 
 import (
-	"net/http"
+	"context"
+	"os"
 	"time"
 
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/t3m8ch/go-learn-2/internal/db"
+	"github.com/t3m8ch/go-learn-2/internal/products"
 	"go.uber.org/zap"
 )
 
 func main() {
-	r := gin.New()
-
 	logger, _ := zap.NewDevelopment()
+
+	conn, err := db.InitDb("postgres://t3m8ch@localhost/productsdb", logger)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	defer conn.Close(context.Background())
+
+	r := gin.New()
+	database := db.New(conn)
 
 	r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 	r.Use(ginzap.RecoveryWithZap(logger, true))
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello world!",
-		})
-	})
+	products.SetupRoutes(r, database, logger)
 
 	r.Run()
 }
