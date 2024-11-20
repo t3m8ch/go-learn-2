@@ -10,7 +10,7 @@ import (
 )
 
 func InitDb(dbUrl string, logger *zap.Logger) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), "postgres://t3m8ch@localhost/productsdb")
+	conn, err := pgx.Connect(context.Background(), dbUrl)
 	if err != nil {
 		return nil, err
 	}

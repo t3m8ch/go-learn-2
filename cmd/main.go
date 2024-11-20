@@ -7,6 +7,7 @@ import (
 
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/t3m8ch/go-learn-2/internal/db"
 	"github.com/t3m8ch/go-learn-2/internal/products"
 	"go.uber.org/zap"
@@ -15,7 +16,12 @@ import (
 func main() {
 	logger, _ := zap.NewDevelopment()
 
-	conn, err := db.InitDb("postgres://t3m8ch@localhost/productsdb", logger)
+	err := godotenv.Load()
+	if err != nil {
+		logger.Warn(".env file not found")
+	}
+
+	conn, err := db.InitDb(os.Getenv("DB_URL"), logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
